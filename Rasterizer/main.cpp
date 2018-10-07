@@ -16,8 +16,11 @@ and may not be redistributed without written permission.*/
 #include <glm/gtx/transform.hpp>
 #include <glm/geometric.hpp>
 
+#include "Remotery.h"
 int main(int argc, char* args[])
 {
+	Remotery* rmt;
+	rmt_CreateGlobalInstance(&rmt);
 	Screen screen;
 
 	srand(time(0));
@@ -42,49 +45,55 @@ int main(int argc, char* args[])
 	
 	float rot = 0;
 
-
+	
 	std::vector<Triangle> triangles;
 	auto & vertices = (MeshLoader.LoadedMeshes[0].Vertices);
 	auto & indices =  (MeshLoader.LoadedMeshes[0].Indices);
-	for (int i = 0; i < indices.size(); i += 3)
+
 	{
-		objl::Vertex v0 = vertices[indices[i]];
-		objl::Vertex v1 = vertices[indices[i+2]];
-		objl::Vertex v2 = vertices[indices[i+1]];
+		rmt_ScopedCPUSample(MeshLoading, 0);
 
-		Triangle newTri;
 
-		newTri.Positions[0].x = v0.Position.X;
-		newTri.Positions[0].y = v0.Position.Y;
-		newTri.Positions[0].z = v0.Position.Z;
+		for (int i = 0; i < indices.size(); i += 3)
+		{
+			objl::Vertex v0 = vertices[indices[i]];
+			objl::Vertex v1 = vertices[indices[i + 2]];
+			objl::Vertex v2 = vertices[indices[i + 1]];
 
-		newTri.Positions[1].x = v1.Position.X;
-		newTri.Positions[1].y = v1.Position.Y;
-		newTri.Positions[1].z = v1.Position.Z;
+			Triangle newTri;
 
-		newTri.Positions[2].x = v2.Position.X;
-		newTri.Positions[2].y = v2.Position.Y;
-		newTri.Positions[2].z = v2.Position.Z;
+			newTri.Positions[0].x = v0.Position.X;
+			newTri.Positions[0].y = v0.Position.Y;
+			newTri.Positions[0].z = v0.Position.Z;
 
-		newTri.Normals[0].x = v0.Normal.X;
-		newTri.Normals[0].y = v0.Normal.Y;
-		newTri.Normals[0].z = v0.Normal.Z;
-		
-		
-		newTri.Normals[1].x = v1.Normal.X;
-		newTri.Normals[1].y = v1.Normal.Y;
-		newTri.Normals[1].z = v1.Normal.Z;
-		
-		newTri.Normals[2].x = v2.Normal.X;
-		newTri.Normals[2].y = v2.Normal.Y;
-		newTri.Normals[2].z = v2.Normal.Z;
+			newTri.Positions[1].x = v1.Position.X;
+			newTri.Positions[1].y = v1.Position.Y;
+			newTri.Positions[1].z = v1.Position.Z;
 
-		//newTri.Normals[0] *= 100;
-		//newTri.Normals[1] *= 100;
-		//newTri.Normals[2] *= 100;
+			newTri.Positions[2].x = v2.Position.X;
+			newTri.Positions[2].y = v2.Position.Y;
+			newTri.Positions[2].z = v2.Position.Z;
 
-		newTri.RandomizeColors();
-		triangles.push_back(newTri);
+			newTri.Normals[0].x = v0.Normal.X;
+			newTri.Normals[0].y = v0.Normal.Y;
+			newTri.Normals[0].z = v0.Normal.Z;
+
+
+			newTri.Normals[1].x = v1.Normal.X;
+			newTri.Normals[1].y = v1.Normal.Y;
+			newTri.Normals[1].z = v1.Normal.Z;
+
+			newTri.Normals[2].x = v2.Normal.X;
+			newTri.Normals[2].y = v2.Normal.Y;
+			newTri.Normals[2].z = v2.Normal.Z;
+
+			//newTri.Normals[0] *= 100;
+			//newTri.Normals[1] *= 100;
+			//newTri.Normals[2] *= 100;
+
+			newTri.RandomizeColors();
+			triangles.push_back(newTri);
+		}
 	}
 	
 	while (true)
@@ -98,27 +107,23 @@ int main(int argc, char* args[])
 		}
 
 		const float scale_factor = 100;
-		glm::mat4 transformat = glm::translate(glm::vec3(ScreenWidth/2,ScreenHeight/2, 1.0))*glm::scale(glm::vec3(scale_factor,-scale_factor, scale_factor))* glm::rotate(rot, glm::vec3(0.f, 1.f, 0.f));
+		glm::mat4 transformat = glm::translate(glm::vec3(ScreenWidth/2,ScreenHeight/2, -1000.0))*glm::scale(glm::vec3(scale_factor,-scale_factor, scale_factor))* glm::rotate(rot, glm::vec3(0.f, 1.f, 0.f));
 
-		for (auto & t : triangles)
 		{
-			Triangle newtri = t.GetMultipliedByMatrix(transformat);
-			drawTri(newtri, [&](ScreenCoord p, float w0, float w1, float w2)
+			rmt_ScopedCPUSample(Rasterizer, 0);
+
+			for (auto & t : triangles)
 			{
-				glm::vec3 color = w0 * newtri.Normals[0] + w1 * newtri.Normals[1] + w2 * newtri.Normals[2];
-				screen.SetPixel(p.x, p.y, Color(color.r, color.g, color.b));
+				Triangle newtri = t.GetMultipliedByMatrix(transformat);
+				drawTri(newtri, [&](ScreenCoord p, float w0, float w1, float w2)
+				{
+					glm::vec3 color = w0 * newtri.Normals[0] + w1 * newtri.Normals[1] + w2 * newtri.Normals[2];
+					float depth = 1.0 / (w0 * newtri.Positions[0].z + w1 * newtri.Positions[1].z + w2 * newtri.Positions[2].z);
+					screen.SetPixel(p.x, p.y, Color(color.r, color.g, color.b), depth);
+				}
+				);
 			}
-			);
 		}
-		/*
-		Triangle newtri = testTri.GetMultipliedByMatrix(transformat);
-		drawTri(newtri, [&](ScreenCoord p, float w0, float w1, float w2)
-		{
-			glm::vec4 color = w0 * testTri.Colors[0] + w1 * testTri.Colors[1] + w2 * testTri.Colors[2];
-			screen.SetPixel(p.x, p.y, Color(color.r, color.g, color.b));
-		}
-		);*/
-
 
 		screen.DrawFrame();
 
@@ -168,5 +173,9 @@ int main(int argc, char* args[])
 	SDL_Quit();
 
 	*/
+
+
+	// Destroy the main instance of Remotery.
+	rmt_DestroyGlobalInstance(rmt);
 	return 0;
 }

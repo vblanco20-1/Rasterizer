@@ -2,3 +2,6 @@
 	path = ThirdParty/GLM
 	url = https://github.com/g-truc/glm.git
 	branch = stable
+[submodule "ThirdParty/Remotery"]
+	path = ThirdParty/Remotery
+	url = https://github.com/Celtoys/Remotery.git

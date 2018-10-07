@@ -50,6 +50,9 @@ Screen::Screen()
 	vector< unsigned char > tilepx(texWidth * ScreenHeight * 4, 0);
 	
 	tileMapPixels = tilepx;
+
+	vector<float > depthpx(texWidth * ScreenHeight, 0.0);
+	depthBuffer = depthpx;
 }
 
 
@@ -59,19 +62,27 @@ Screen::~Screen()
 	SDL_DestroyWindow(window);
 }
 
-void Screen::SetPixel(unsigned short x, unsigned short y, Color color)
+void Screen::SetPixel(unsigned short x, unsigned short y, Color color,float Depth)
 {
 	
 
 	const unsigned int offset = (ScreenWidth * 4 * y) + x * 4;
 	char pxC = 0;
 	
+	const unsigned int idx = (ScreenWidth * y) + x;
+	if(Depth < depthBuffer[idx])
+	{
+		tileMapPixels[offset + 0] = color.b;        // b
+		tileMapPixels[offset + 1] = color.g;          // g
+		tileMapPixels[offset + 2] = color.r;        // r
 
-	tileMapPixels[offset + 0] = color.b;        // b
-	tileMapPixels[offset + 1] = color.g;          // g
-	tileMapPixels[offset + 2] = color.r;        // r
+		tileMapPixels[offset + 3] = color.a;    // a		
+
+		depthBuffer[idx] = Depth;
+
+	}
+
 	
-	tileMapPixels[offset + 3] = color.a;    // a		
 	
 
 }
@@ -81,6 +92,10 @@ void Screen::Clear()
 	for (auto &p : tileMapPixels)
 	{
 		p = 0;
+	}
+	for (auto &p : depthBuffer)
+	{
+		p = 1.0f;
 	}
 }
 

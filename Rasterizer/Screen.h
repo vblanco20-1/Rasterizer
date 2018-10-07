@@ -23,7 +23,8 @@ public:
 	~Screen();
 
 	
-	void SetPixel(unsigned short x, unsigned short y, Color color);
+	void SetPixel(unsigned short x, unsigned short y, Color color,float Depth);
+	
 
 	void Clear();
 	void DrawFrame();
@@ -43,7 +44,7 @@ private:
 	SDL_Texture* texture;
 
 	std::vector< uint8_t > tileMapPixels;
-
+	std::vector<float> depthBuffer;
 
 };
 
