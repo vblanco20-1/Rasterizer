@@ -139,6 +139,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Screen.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="Constants.h" />
+    <ClInclude Include="RasterizerMath.h" />
+    <ClInclude Include="Screen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,13 +4,46 @@ and may not be redistributed without written permission.*/
 //Using SDL and standard IO
 #include <SDL.h>
 #include <stdio.h>
+#include <functional>
+#include "Constants.h"
+#include "Screen.h"
+#include "RasterizerMath.h"
 
-//Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
 
 int main(int argc, char* args[])
 {
+	Screen screen;
+
+	Point3D A;
+	Point3D B;
+	Point3D C;
+
+	A.y = 10;
+	A.x = 100;
+
+	C.y = 150;
+	C.x = 10;
+
+	B.y = 100;
+	B.x = 200;
+
+	while (true)
+	{
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+
+		}
+		drawTri(A, B, C, [&](Point3D p, float w0, float w1, float w2)
+		{
+			screen.SetPixel(p.x, p.y, Color(w0,w1, w2));
+		}
+		);
+		screen.DrawFrame();
+
+		
+	}
+	/*
 	//The window we'll be rendering to
 	SDL_Window* window = NULL;
 
@@ -52,5 +85,6 @@ int main(int argc, char* args[])
 	//Quit SDL subsystems
 	SDL_Quit();
 
+	*/
 	return 0;
 }
