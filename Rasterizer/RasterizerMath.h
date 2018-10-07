@@ -2,10 +2,14 @@
 #include "Constants.h"
 #include <algorithm>
 #include <functional>
+#include <glm/vec3.hpp>
 
 struct Point3D {
 	float x, y,z;
 };
+
+
+
 
 float orient2d(const Point3D& a, const Point3D& b, const Point3D& c)
 {
