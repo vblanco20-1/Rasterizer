@@ -1,0 +1,4 @@
+[submodule "ThirdParty/GLM"]
+	path = ThirdParty/GLM
+	url = https://github.com/g-truc/glm.git
+	branch = stable
