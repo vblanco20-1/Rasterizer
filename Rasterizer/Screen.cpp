@@ -15,7 +15,7 @@ Screen::Screen()
 	(
 		"SDL2",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		256, 256,
+		ScreenWidth, ScreenHeight,
 		SDL_WINDOW_SHOWN
 	);
 
@@ -61,14 +61,7 @@ Screen::~Screen()
 
 void Screen::SetPixel(unsigned short x, unsigned short y, Color color)
 {
-	if (x < 0 || x > 255)
-	{
-		return;
-	}
-	if (y < 0 || y > 255)
-	{
-		return;
-	}
+	
 
 	const unsigned int offset = (ScreenWidth * 4 * y) + x * 4;
 	char pxC = 0;

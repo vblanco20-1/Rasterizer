@@ -7,7 +7,7 @@
 
 struct Point3D {
 	float x, y,z;
-	Point3D(glm::vec4 vec)
+	Point3D(glm::vec3 vec)
 	{
 		x = vec.x;
 		y = vec.y;
@@ -20,25 +20,26 @@ struct ScreenCoord {
 
 
 struct Triangle {
-	glm::vec4 Positions[3];
-	glm::vec4 Colors[3];
+	glm::vec3 Positions[3];
+	glm::vec3 Colors[3];
+	glm::vec3 Normals[3];
 	 
 	void RandomizeColors() {
 
 		Colors[0].r = ((float)rand()) / (float)RAND_MAX;
 		Colors[0].g = ((float)rand()) / (float)RAND_MAX;
 		Colors[0].b = ((float)rand()) / (float)RAND_MAX;
-		Colors[0].a = 1.f;
+		//Colors[0].a = 1.f;
 
 		Colors[1].r = ((float)rand()) / (float)RAND_MAX;
 		Colors[1].g = ((float)rand()) / (float)RAND_MAX;
 		Colors[1].b = ((float)rand()) / (float)RAND_MAX;
-		Colors[1].a = 1.f;
+		//Colors[1].a = 1.f;
 
 		Colors[2].r = ((float)rand()) / (float)RAND_MAX;
 		Colors[2].g = ((float)rand()) / (float)RAND_MAX;
 		Colors[2].b = ((float)rand()) / (float)RAND_MAX;
-		Colors[2].a = 1.f;
+		//Colors[2].a = 1.f;
 	}
 
 	Triangle GetMultipliedByMatrix(glm::mat4 matrix)
@@ -46,7 +47,7 @@ struct Triangle {
 		Triangle newtri(*this);
 		for (int i = 0; i < 3; i++)
 		{
-			newtri.Positions[i] = matrix * Positions[i];
+			newtri.Positions[i] = matrix * glm::vec4(Positions[i],1.0f);
 		}
 		return newtri;
 	}
