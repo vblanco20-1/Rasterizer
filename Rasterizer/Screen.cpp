@@ -114,5 +114,7 @@ void Screen::DrawFrame()
 	
 	SDL_RenderCopy(renderer, tileMap, nullptr, nullptr);
 	SDL_RenderPresent(renderer);
+
+	
 }
 
