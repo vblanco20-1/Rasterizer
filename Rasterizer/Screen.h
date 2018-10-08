@@ -23,7 +23,7 @@ struct TileQueueTraits : public moodycamel::ConcurrentQueueDefaultTraits
 };
 
 
-using TileQueue = moodycamel::ConcurrentQueue<Triangle, TileQueueTraits>;
+using TileQueue = moodycamel::ConcurrentQueue<Triangle*, TileQueueTraits>;
 
 struct FramebufferTile {
 	//coordinates
@@ -62,7 +62,7 @@ public:
 	
 
 
-	void AddTriangleToTiles(const Triangle &tri);
+	void AddTriangleToTiles(Triangle &tri);
 
 	void BuildTileArray();
 

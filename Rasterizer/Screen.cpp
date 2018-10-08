@@ -105,7 +105,7 @@ void Screen::DrawFrame()
 	
 }
 
-void Screen::AddTriangleToTiles(const Triangle &tri)
+void Screen::AddTriangleToTiles(Triangle &tri)
 {
 	const auto v0 = tri.Positions[0];
 	const auto v1 = tri.Positions[1];
@@ -144,7 +144,7 @@ void Screen::AddTriangleToTiles(const Triangle &tri)
 		{
 			const auto tileIDX = (y * xTiles) + x;
 
-			Tiles[tileIDX].trianglequeue.enqueue(tri);
+			Tiles[tileIDX].trianglequeue.enqueue(&tri);
 		}
 	}
 
@@ -192,7 +192,7 @@ void Screen::DrawTile(short tile_x, short tile_y)
 
 void Screen::DrawTile(FramebufferTile * Tile)
 {
-	Triangle buffer[TileQueueTraits::BLOCK_SIZE];
+	Triangle *buffer[TileQueueTraits::BLOCK_SIZE];
 
 	while (Tile->trianglequeue.size_approx() > 0)
 	{
@@ -205,7 +205,8 @@ void Screen::DrawTile(FramebufferTile * Tile)
 
 		for (int i = 0; i < count; i++)
 		{
-			drawTri_Tile(buffer[i], Tile);
+			
+			drawTri_Tile(*buffer[i], Tile);
 		}
 	}
 }

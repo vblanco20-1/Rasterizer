@@ -76,7 +76,7 @@ struct Triangle {
 
 
 
-float orient2d(const Point3D& a, const Point3D& b, const ScreenCoord& c);
+//float orient2d(const Point3D& a, const Point3D& b, const ScreenCoord& c);
 
 
 
