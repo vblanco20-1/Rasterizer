@@ -80,9 +80,6 @@ TaskEnd<ParallelForTaskData> *Parallel_For(ftl::TaskScheduler *taskScheduler, si
 
 		}
 		return taskEnd;
-		//taskScheduler->WaitForCounter(&counter, 0);
-		//delete[] tasks;
-		//delete[] taskdata;
 	}
 
 }

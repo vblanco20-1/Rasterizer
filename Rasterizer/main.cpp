@@ -75,12 +75,12 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 				, 0, g_Framebuffer->Tiles.size(), 1, [&](auto i) {
 
 				g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
-				//PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(transformat);
+				
 			});
 			end->Wait(0, true);
 			first_par->Wait(0, true);
 			
-			end->Clear();
+			
 			delete end;
 
 			
@@ -91,64 +91,18 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 				, 0, g_Framebuffer->Tiles.size(), 1, [&](auto i) {
 
 				g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
-				//PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(transformat);
 			});
 
-			 //first_par->Wait(0, true);
+			
 			second_par->Wait(0, true);
-
-
-			 first_par->Clear();
-			second_par->Clear();
-
-			delete first_par;
-			delete second_par;
-			/*
-			Parallel_For(//nullptr
-				taskScheduler
-
-				,0, PostTransformTriangles.size(), 4000, [&](auto i) {
-
-
-				PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(transformat);
-			});*/
-		
 
 
 			
 
-		{
-			//rmt_ScopedCPUSample(Rasterizer, 0);
-
-			//Parallel_For(//nullptr
-			//	taskScheduler
-			//
-			//	, 0, g_Framebuffer->Tiles.size(), 1, [&](auto i) {
-			//
-			//	g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
-			//	//PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(transformat);
-			//});
-			/*
-			for (FramebufferTile & Tile : g_Framebuffer->Tiles)
-			{
-				g_Framebuffer->DrawTile(&Tile);
-			}*/
-			/*
-			for (Triangle & t : *vInputs.OutputTriangles)
-			{
-				//Triangle newtri
-				drawTri(t, [](ScreenCoord p,const Triangle& tri ,float w0, float w1, float w2)
-				{
-					glm::vec3 color = w0 * tri.Normals[0] + w1 * tri.Normals[1] + w2 * tri.Normals[2];
-					float depth = 1.0 / (w0 * tri.Positions[0].z + w1 * tri.Positions[1].z + w2 * tri.Positions[2].z);
-					g_Framebuffer->SetPixel(p.x, p.y, Color(color.r, color.g, color.b), depth);
-				}
-				);
-			}
-			*/
-		}
-
-	
+			delete first_par;
+			delete second_par;
+			
+					
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
@@ -161,7 +115,8 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 
 		{
 			rmt_ScopedCPUSample(Wait, 0);
-		//Concurrency::wait(500);
+			//stall
+			//Concurrency::wait(500);
 		}
 
 		screen.DrawFrame();

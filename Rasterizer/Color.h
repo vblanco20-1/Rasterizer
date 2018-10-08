@@ -15,8 +15,8 @@ struct Color {
 		return (char)f;
 	}
 
-	Color(char _r, char _g, char _b): r(_r),g(_g),b(_b),a(255){	}
-	Color(float _r, float _g, float _b):a(255) {
+	Color(char _r, char _g, char _b): r(_r),g(_g),b(_b),a((char)255){	}
+	Color(float _r, float _g, float _b):a((char)255) {
 		r = FloatToColor(_r);
 		g = FloatToColor(_g);
 		b = FloatToColor(_b);

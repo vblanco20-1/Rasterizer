@@ -28,6 +28,12 @@ struct TaskEnd {
 
 	}
 
+	~TaskEnd()
+	{
+		Wait(0,true);
+		delete[] tasks;
+		delete[] taskdata;
+	}
 	void Wait(int counterval = 0, bool PinThread = false) {
 
 		if (taskScheduler)
@@ -36,10 +42,7 @@ struct TaskEnd {
 		}
 
 	};
-	void Clear() {
-		delete[] tasks;
-		delete[] taskdata;
-	}
+	
 };
 /*
 struct VertexShaderTaskEnd {
