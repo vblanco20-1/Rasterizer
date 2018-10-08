@@ -13,3 +13,5 @@ The current version can rasterize the 870.000 triangles stanford dragon in a 102
 
 It works by launching a parallel for on the triangle array, wich runs a "vertex shader" to update the matrices. This also bins the triangles into screenspace tiles.
 After that, another parallel for is launched, on the tiles, to perform thread safe tile based rasterization without data races.
+
+This project is a work in progress, and should not be used as an example of anything due to its extremelly experimental stage and low code quality.
