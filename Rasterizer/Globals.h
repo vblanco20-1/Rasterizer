@@ -2,4 +2,4 @@
 
 class Screen;
 
-Screen*g_Framebuffer;
+extern Screen*g_Framebuffer;

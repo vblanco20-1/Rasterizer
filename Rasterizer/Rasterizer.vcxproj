@@ -70,16 +70,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;$(IncludePath)</IncludePath>
+    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;K:\Programming\Rasterizer\ThirdParty\ConcurrentQueue;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;$(IncludePath)</IncludePath>
+    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;K:\Programming\Rasterizer\ThirdParty\ConcurrentQueue;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;$(IncludePath)</IncludePath>
+    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;K:\Programming\Rasterizer\ThirdParty\ConcurrentQueue;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;$(IncludePath)</IncludePath>
+    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;K:\Programming\Rasterizer\ThirdParty\ConcurrentQueue;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClCompile Include="..\ThirdParty\Remotery\lib\Remotery.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RasterizerMath.cpp" />
     <ClCompile Include="Screen.cpp" />
   </ItemGroup>
   <ItemGroup>

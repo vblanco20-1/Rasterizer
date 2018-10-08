@@ -2,6 +2,7 @@
 #include <functional>
 #include "ftl/atomic_counter.h"
 #include "ftl/task_scheduler.h"
+#include "VertexShader.h"
 
 struct ParallelForTaskData {
 	size_t begin; 
@@ -20,11 +21,11 @@ void ParallelForSubfunction(ftl::TaskScheduler *taskScheduler, void *arg) {
 	}
 }
 
-void Parallel_For(ftl::TaskScheduler *taskScheduler, size_t begin, size_t end, size_t batch, std::function<void(size_t)> kernel) {
+TaskEnd<ParallelForTaskData> *Parallel_For(ftl::TaskScheduler *taskScheduler, size_t begin, size_t end, size_t batch, std::function<void(size_t)> kernel) {
 	
 	if ( begin > end || begin == end)
 	{
-		return;
+		return nullptr;
 	}
 
 	//serial
@@ -36,16 +37,25 @@ void Parallel_For(ftl::TaskScheduler *taskScheduler, size_t begin, size_t end, s
 		{
 			kernel(i);
 		} 
+
+		return nullptr;
 	}	
 	//go parallel
 	else if (taskScheduler)
 	{
 
-		
+		TaskEnd<ParallelForTaskData> *taskEnd = new TaskEnd<ParallelForTaskData>(taskScheduler);
+
 		const uint64 numTasks = (end - begin) / batch;
 		ftl::Task * tasks = new ftl::Task[numTasks];
 		ParallelForTaskData * taskdata = new ParallelForTaskData[numTasks];
-		ftl::AtomicCounter counter(taskScheduler);
+		//ftl::AtomicCounter counter(taskScheduler);
+		
+		taskEnd->numtasks = numTasks;
+		//taskEnd->counter = ftl::AtomicCounter(taskScheduler);
+		taskEnd->taskdata = taskdata;
+		taskEnd->taskScheduler = taskScheduler;
+		taskEnd->tasks = tasks;
 		{
 
 			rmt_ScopedCPUSample(Parallel_For_Init, 0);
@@ -66,12 +76,13 @@ void Parallel_For(ftl::TaskScheduler *taskScheduler, size_t begin, size_t end, s
 
 			// Schedule the tasks and wait for them to complete
 			
-			taskScheduler->AddTasks(numTasks, tasks, &counter);
+			taskScheduler->AddTasks(numTasks, tasks, &taskEnd->counter);
 
 		}
-		taskScheduler->WaitForCounter(&counter, 0);
-		delete[] tasks;
-		delete[] taskdata;
+		return taskEnd;
+		//taskScheduler->WaitForCounter(&counter, 0);
+		//delete[] tasks;
+		//delete[] taskdata;
 	}
 
 }

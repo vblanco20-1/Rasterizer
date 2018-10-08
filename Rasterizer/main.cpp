@@ -23,6 +23,8 @@ and may not be redistributed without written permission.*/
 #include "Globals.h"
 #include "VertexShader.h"
 
+#include "concrt.h"
+
 struct Mesh {
 	std::vector<Triangle> Triangles;
 };
@@ -47,12 +49,12 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 
 	while (true)
 	{
-		
+
 		screen.Clear();
 
 		auto start = std::chrono::system_clock::now();
 
-		const float scale_factor = 100;
+		const float scale_factor = 200;
 		glm::mat4 transformat = glm::translate(glm::vec3(ScreenWidth / 2, ScreenHeight / 2, -1000.0))*glm::scale(glm::vec3(scale_factor, -scale_factor, scale_factor))* glm::rotate(rot, glm::vec3(0.f, 1.f, 0.f));
 
 		//rmt_ScopedCPUSample(VertexShader, 0);
@@ -60,30 +62,81 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 		vInputs.InputTriangles = &MeshTriangles;
 		vInputs.OutputTriangles = &PostTransformTriangles;
 		vInputs.ModelMatrix = &transformat;
-		{
+		
+
+
+			auto end = ExecuteVertexShader(taskScheduler, 0, PostTransformTriangles.size(), 4096, &vInputs);
+			
+			end->Wait(end->numtasks/2,true);
+
+			auto first_par = Parallel_For(//nullptr
+				taskScheduler
+
+				, 0, g_Framebuffer->Tiles.size(), 1, [&](auto i) {
+
+				g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
+				//PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(transformat);
+			});
+			end->Wait(0, true);
+			first_par->Wait(0, true);
+			
+			end->Clear();
+			delete end;
+
 			
 
-			ExecuteVertexShader(taskScheduler,0, PostTransformTriangles.size(), 4096, &vInputs);
+			auto second_par = Parallel_For(//nullptr
+				taskScheduler
+
+				, 0, g_Framebuffer->Tiles.size(), 1, [&](auto i) {
+
+				g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
+				//PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(transformat);
+			});
+
+			 //first_par->Wait(0, true);
+			second_par->Wait(0, true);
+
+
+			 first_par->Clear();
+			second_par->Clear();
+
+			delete first_par;
+			delete second_par;
 			/*
 			Parallel_For(//nullptr
-				taskScheduler				 		
-				
+				taskScheduler
+
 				,0, PostTransformTriangles.size(), 4000, [&](auto i) {
 
 
 				PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(transformat);
 			});*/
-		}
+		
 
 
-
+			
 
 		{
-			rmt_ScopedCPUSample(Rasterizer, 0);
+			//rmt_ScopedCPUSample(Rasterizer, 0);
 
+			//Parallel_For(//nullptr
+			//	taskScheduler
+			//
+			//	, 0, g_Framebuffer->Tiles.size(), 1, [&](auto i) {
+			//
+			//	g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
+			//	//PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(transformat);
+			//});
+			/*
+			for (FramebufferTile & Tile : g_Framebuffer->Tiles)
+			{
+				g_Framebuffer->DrawTile(&Tile);
+			}*/
+			/*
 			for (Triangle & t : *vInputs.OutputTriangles)
 			{
-				//Triangle newtri 
+				//Triangle newtri
 				drawTri(t, [](ScreenCoord p,const Triangle& tri ,float w0, float w1, float w2)
 				{
 					glm::vec3 color = w0 * tri.Normals[0] + w1 * tri.Normals[1] + w2 * tri.Normals[2];
@@ -92,6 +145,7 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 				}
 				);
 			}
+			*/
 		}
 
 	
@@ -101,9 +155,14 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 		{
 
 		}
-		auto end = std::chrono::system_clock::now();
-		auto elapsed = end - start;
-		std::cout <<"Rasterizer Full Frame Time: " <<elapsed.count() << '\n';
+		auto endt = std::chrono::system_clock::now();
+		auto elapsed = endt - start;
+		std::cout << "Rasterizer Full Frame Time: " << elapsed.count() << '\n';
+
+		{
+			rmt_ScopedCPUSample(Wait, 0);
+		//Concurrency::wait(500);
+		}
 
 		screen.DrawFrame();
 
@@ -113,6 +172,7 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 
 }
 float rot = 0;
+Screen*g_Framebuffer{nullptr};
 int main(int argc, char* args[])
 {
 
@@ -129,7 +189,7 @@ int main(int argc, char* args[])
 
 	objl::Loader MeshLoader;
 	MeshLoader.LoadFile("dragon.obj");
-
+	//MeshLoader.LoadFile("Monkey.obj");
 	testTri.Positions[0].y = 1;
 	testTri.Positions[0].x = 1;
 	testTri.Positions[0].z = 0;
@@ -229,17 +289,17 @@ int main(int argc, char* args[])
 		taskScheduler.Run(50, RenderMeshTask, &RenderData,0,ftl::EmptyQueueBehavior::Sleep);
 
 		
-		while (true)
-		{
-
-			SDL_Event event;
-			while (SDL_PollEvent(&event))
-			{
-
-			}
-		screen.DrawFrame();
-		}
-		rot += 0.1f;
+		//while (true)
+		//{
+		//
+		//	SDL_Event event;
+		//	while (SDL_PollEvent(&event))
+		//	{
+		//
+		//	}
+		//screen.DrawFrame();
+		//}
+		//rot += 0.1f;
 		
 	}
 	/*

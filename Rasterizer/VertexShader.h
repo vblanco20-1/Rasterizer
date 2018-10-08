@@ -1,5 +1,6 @@
 #pragma once
 #include "RasterizerMath.h"
+#include "Globals.h"
 
 
 struct VertexShaderInputs {
@@ -14,6 +15,61 @@ struct VertexShaderTaskData {
 	VertexShaderInputs * Inputs;
 };
 
+template<typename T>
+struct TaskEnd {
+	ftl::Task * tasks{ nullptr };
+	T * taskdata{ nullptr };
+	ftl::AtomicCounter counter;
+	ftl::TaskScheduler *taskScheduler{ nullptr };
+	int  numtasks{ 0 };
+
+	TaskEnd(ftl::TaskScheduler * sched) : counter(sched), taskScheduler(sched)
+	{
+
+	}
+
+	void Wait(int counterval = 0, bool PinThread = false) {
+
+		if (taskScheduler)
+		{
+			taskScheduler->WaitForCounter(&counter, counterval, PinThread);
+		}
+
+	};
+	void Clear() {
+		delete[] tasks;
+		delete[] taskdata;
+	}
+};
+/*
+struct VertexShaderTaskEnd {
+
+	ftl::Task * tasks{ nullptr };
+	VertexShaderTaskData * taskdata{ nullptr };
+	ftl::AtomicCounter counter;
+	ftl::TaskScheduler *taskScheduler{ nullptr };
+	int  numtasks{0};
+
+	VertexShaderTaskEnd(ftl::TaskScheduler * sched): counter(sched),taskScheduler(sched)
+	{
+
+	}
+
+	void Wait(int counterval = 0, bool PinThread = false) {
+	
+		if (taskScheduler)
+		{
+			taskScheduler->WaitForCounter(&counter, counterval, PinThread);
+		}
+		
+	};
+	void Clear() {
+		delete[] tasks;
+		delete[] taskdata;
+	}
+};
+*/
+
 void VertexShaderSubfunction(ftl::TaskScheduler *taskScheduler, void *arg) {
 	VertexShaderTaskData *subset = reinterpret_cast<VertexShaderTaskData *>(arg);
 
@@ -27,42 +83,50 @@ void VertexShaderSubfunction(ftl::TaskScheduler *taskScheduler, void *arg) {
 	for (i = subset->begin; i < subset->end ; i += 1)
 	{
 		PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(mat);
+		g_Framebuffer->AddTriangleToTiles(PostTransformTriangles[i]);
 	}
 }
 
 
 
-void ExecuteVertexShader(ftl::TaskScheduler *taskScheduler, size_t begin, size_t end, size_t batch, VertexShaderInputs *Inputs) {
+TaskEnd<VertexShaderTaskData> *ExecuteVertexShader(ftl::TaskScheduler *taskScheduler, size_t begin, size_t end, size_t batch, VertexShaderInputs *Inputs) {
 
 	if (begin > end || begin == end)
 	{
-		return;
+		return nullptr;
 	}
 
 	
 
 	//serial
-	if (taskScheduler == nullptr || end - begin < batch)
+	if (taskScheduler == nullptr )
 	{
-		rmt_ScopedCPUSample(Parallel_For_Work, 0);
+		rmt_ScopedCPUSample(Vertex_Shader, 0);
 
 		VertexShaderTaskData Task;
 		Task.begin = begin;
 		Task.end = end;
 		Task.Inputs = Inputs;
 
+
 		VertexShaderSubfunction(nullptr, &Task);
 		
+		return nullptr;
 	}
 	//go parallel
 	else if (taskScheduler)
 	{
-
+		TaskEnd<VertexShaderTaskData> *taskEnd = new TaskEnd<VertexShaderTaskData>(taskScheduler);
 
 		const uint64 numTasks = (end - begin) / batch;
 		ftl::Task * tasks = new ftl::Task[numTasks];
 		VertexShaderTaskData * taskdata = new VertexShaderTaskData[numTasks];
-		ftl::AtomicCounter counter(taskScheduler);
+
+		taskEnd->numtasks = numTasks;
+		//taskEnd->counter = ftl::AtomicCounter(taskScheduler);
+		taskEnd->taskdata = taskdata;
+		taskEnd->taskScheduler = taskScheduler;
+		taskEnd->tasks = tasks;
 		{
 
 			rmt_ScopedCPUSample(Parallel_For_Init, 0);
@@ -83,11 +147,16 @@ void ExecuteVertexShader(ftl::TaskScheduler *taskScheduler, size_t begin, size_t
 
 			// Schedule the tasks and wait for them to complete
 
-			taskScheduler->AddTasks(numTasks, tasks, &counter);
+			taskScheduler->AddTasks(numTasks, tasks, &taskEnd->counter);
 
 		}
-		taskScheduler->WaitForCounter(&counter, 0);
-		delete[] tasks;
-		delete[] taskdata;
+
+		return taskEnd;
+		//taskEnd.counter = counter;
+		//taskEnd.
+		//
+		//taskScheduler->WaitForCounter(&counter, 0);
+		//delete[] tasks;
+		//delete[] taskdata;
 	}
 }
