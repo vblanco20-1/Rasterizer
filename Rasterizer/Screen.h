@@ -4,7 +4,7 @@
 #include <SDL_render.h>
 #include <vector>
 #include "Color.h"
-
+#include "Constants.h"
 struct Sprite
 {
 	uint8_t posX;
@@ -14,7 +14,10 @@ struct Sprite
 
 };
 
-
+struct FramebufferTile {
+	//coordinates
+	uint16_t minX, maxX, minY, maxY;
+};
 
 class Screen
 {
@@ -23,8 +26,24 @@ public:
 	~Screen();
 
 	
-	void SetPixel(unsigned short x, unsigned short y, Color color,float Depth);
-	
+	__forceinline void SetPixel(unsigned short x, unsigned short y, Color color,float Depth)	
+	{
+		const unsigned int offset = (ScreenWidth * 4 * y) + x * 4;
+		const char pxC = 0;
+
+		const unsigned int idx = (ScreenWidth * y) + x;
+		if (Depth < depthBuffer[idx])
+		{
+			tileMapPixels[offset + 0] = color.b;        // b
+			tileMapPixels[offset + 1] = color.g;          // g
+			tileMapPixels[offset + 2] = color.r;        // r
+
+			tileMapPixels[offset + 3] = color.a;    // a		
+
+			depthBuffer[idx] = Depth;
+
+		}
+	}
 
 	void Clear();
 	void DrawFrame();

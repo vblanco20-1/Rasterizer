@@ -20,7 +20,7 @@ struct ScreenCoord {
 
 
 struct Triangle {
-	glm::vec3 Positions[3];
+	glm::vec4 Positions[3];
 	glm::vec3 Colors[3];
 	glm::vec3 Normals[3];
 	 
@@ -42,12 +42,12 @@ struct Triangle {
 		//Colors[2].a = 1.f;
 	}
 
-	Triangle GetMultipliedByMatrix(glm::mat4 matrix)
+	__forceinline Triangle GetMultipliedByMatrix(glm::mat4 matrix)
 	{
 		Triangle newtri(*this);
 		for (int i = 0; i < 3; i++)
 		{
-			newtri.Positions[i] = matrix * glm::vec4(Positions[i],1.0f);
+			newtri.Positions[i] = matrix * Positions[i];//glm::vec4(Positions[i],1.0f);
 		}
 		return newtri;
 	}
@@ -62,7 +62,7 @@ float orient2d(const Point3D& a, const Point3D& b, const ScreenCoord& c)
 	return p - z;
 }
 
-void drawTri(Triangle& Tri,std::function<void(ScreenCoord, float, float, float)> putpixel)
+void drawTri(const Triangle& Tri,std::function<void(ScreenCoord, const Triangle&, float, float, float)> putpixel)
 {
 
 	const Point3D v0 = Point3D(Tri.Positions[0]);
@@ -70,10 +70,10 @@ void drawTri(Triangle& Tri,std::function<void(ScreenCoord, float, float, float)>
 	const Point3D v2 = Point3D(Tri.Positions[2]);
 
 	// Compute triangle bounding box
-	int minX = std::min(v0.x, std::min(v1.x, v2.x));
-	int minY = std::min(v0.y, std::min(v1.y, v2.y));
-	int maxX = std::max(v0.x, std::max(v1.x, v2.x));
-	int maxY = std::max(v0.y, std::max(v1.y, v2.y));
+	int minX = (int)std::min(v0.x, std::min(v1.x, v2.x));
+	int minY = (int)std::min(v0.y, std::min(v1.y, v2.y));
+	int maxX = (int)std::max(v0.x, std::max(v1.x, v2.x));
+	int maxY = (int)std::max(v0.y, std::max(v1.y, v2.y));
 
 	// Clip against screen bounds
 	minX = std::max(minX, 0);
@@ -95,7 +95,7 @@ void drawTri(Triangle& Tri,std::function<void(ScreenCoord, float, float, float)>
 
 			// If p is on or inside all edges, render pixel.
 			if (w0 >= 0 && w1 >= 0 && w2 >= 0)
-				putpixel(p, w0 / area, w1 / area, w2 / area);
+				putpixel(p, Tri, w0 / area, w1 / area, w2 / area);
 		}
 	}
 }

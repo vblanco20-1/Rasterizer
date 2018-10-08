@@ -70,16 +70,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;$(IncludePath)</IncludePath>
+    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;$(IncludePath)</IncludePath>
+    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;$(IncludePath)</IncludePath>
+    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;$(IncludePath)</IncludePath>
+    <IncludePath>K:\Programming\SDL2-2.0.8\include;K:\Programming\Rasterizer\ThirdParty\GLM;K:\Programming\Rasterizer\ThirdParty\OBJ-Loader;K:\Programming\Rasterizer\ThirdParty\Remotery\lib;K:\Programming\FiberTaskingLib\include;K:\Programming\FiberTaskingLib\third_party\boost_context\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,7 +89,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>K:\Programming\SDL2-2.0.8\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>K:\Programming\SDL2-2.0.8\lib\x64;K:\Programming\FiberTaskingLib\build\third_party\boost_context\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -100,8 +100,8 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>K:\Programming\SDL2-2.0.8\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>K:\Programming\SDL2-2.0.8\lib\x64;K:\Programming\FiberTaskingLib\build\third_party\boost_context\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib; ftl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -117,7 +117,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>K:\Programming\SDL2-2.0.8\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>K:\Programming\SDL2-2.0.8\lib\x64;K:\Programming\FiberTaskingLib\build\third_party\boost_context\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -132,8 +132,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>K:\Programming\SDL2-2.0.8\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>K:\Programming\SDL2-2.0.8\lib\x64;K:\Programming\FiberTaskingLib\build\third_party\boost_context\Release;K:\Programming\FiberTaskingLib\build\source\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib; ftl.lib;boost_context.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -146,8 +146,11 @@
     <ClInclude Include="..\ThirdParty\Remotery\lib\Remotery.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="Globals.h" />
+    <ClInclude Include="ParallelFor.h" />
     <ClInclude Include="RasterizerMath.h" />
     <ClInclude Include="Screen.h" />
+    <ClInclude Include="VertexShader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

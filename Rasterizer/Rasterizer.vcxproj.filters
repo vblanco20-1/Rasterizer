@@ -44,5 +44,14 @@
     <ClInclude Include="..\ThirdParty\Remotery\lib\Remotery.h">
       <Filter>ThirdParty</Filter>
     </ClInclude>
+    <ClInclude Include="ParallelFor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

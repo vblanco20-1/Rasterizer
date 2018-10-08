@@ -10,6 +10,7 @@ and may not be redistributed without written permission.*/
 #include "RasterizerMath.h"
 
 #include<ctime>
+#include <chrono>
 #define GLM_ENABLE_EXPERIMENTAL
 #define OBJL_CONSOLE_OUTPUT
 #include "OBJ_Loader.h"
@@ -17,11 +18,111 @@ and may not be redistributed without written permission.*/
 #include <glm/geometric.hpp>
 
 #include "Remotery.h"
+
+#include "ParallelFor.h"
+#include "Globals.h"
+#include "VertexShader.h"
+
+struct Mesh {
+	std::vector<Triangle> Triangles;
+};
+
+struct RenderTaskData {
+	
+	std::vector<Triangle>* MeshTriangles;
+	std::vector<Triangle>* PostTransformTriangles;
+	glm::mat4 * transform;
+};
+
+void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
+
+	
+	float rot = 0;
+	RenderTaskData*renderdata = reinterpret_cast<RenderTaskData *>(arg);
+
+
+	Screen&screen = *g_Framebuffer;
+	std::vector<Triangle> & MeshTriangles = *renderdata->MeshTriangles;
+	std::vector<Triangle> & PostTransformTriangles = *renderdata->PostTransformTriangles;
+
+	while (true)
+	{
+		
+		screen.Clear();
+
+		auto start = std::chrono::system_clock::now();
+
+		const float scale_factor = 100;
+		glm::mat4 transformat = glm::translate(glm::vec3(ScreenWidth / 2, ScreenHeight / 2, -1000.0))*glm::scale(glm::vec3(scale_factor, -scale_factor, scale_factor))* glm::rotate(rot, glm::vec3(0.f, 1.f, 0.f));
+
+		//rmt_ScopedCPUSample(VertexShader, 0);
+		VertexShaderInputs vInputs;
+		vInputs.InputTriangles = &MeshTriangles;
+		vInputs.OutputTriangles = &PostTransformTriangles;
+		vInputs.ModelMatrix = &transformat;
+		{
+			
+
+			ExecuteVertexShader(taskScheduler,0, PostTransformTriangles.size(), 4096, &vInputs);
+			/*
+			Parallel_For(//nullptr
+				taskScheduler				 		
+				
+				,0, PostTransformTriangles.size(), 4000, [&](auto i) {
+
+
+				PostTransformTriangles[i] = MeshTriangles[i].GetMultipliedByMatrix(transformat);
+			});*/
+		}
+
+
+
+
+		{
+			rmt_ScopedCPUSample(Rasterizer, 0);
+
+			for (Triangle & t : *vInputs.OutputTriangles)
+			{
+				//Triangle newtri 
+				drawTri(t, [](ScreenCoord p,const Triangle& tri ,float w0, float w1, float w2)
+				{
+					glm::vec3 color = w0 * tri.Normals[0] + w1 * tri.Normals[1] + w2 * tri.Normals[2];
+					float depth = 1.0 / (w0 * tri.Positions[0].z + w1 * tri.Positions[1].z + w2 * tri.Positions[2].z);
+					g_Framebuffer->SetPixel(p.x, p.y, Color(color.r, color.g, color.b), depth);
+				}
+				);
+			}
+		}
+
+	
+
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+
+		}
+		auto end = std::chrono::system_clock::now();
+		auto elapsed = end - start;
+		std::cout <<"Rasterizer Full Frame Time: " <<elapsed.count() << '\n';
+
+		screen.DrawFrame();
+
+		rot += 0.1f;
+	}
+
+
+}
+float rot = 0;
 int main(int argc, char* args[])
 {
+
+	ftl::TaskScheduler taskScheduler;
+
 	Remotery* rmt;
 	rmt_CreateGlobalInstance(&rmt);
 	Screen screen;
+
+	g_Framebuffer = &screen;
 
 	srand(time(0));
 	Triangle testTri;
@@ -41,15 +142,18 @@ int main(int argc, char* args[])
 	testTri.Positions[1].x = 2;
 	testTri.Positions[1].z = 0;
 
+	testTri.Positions[0].w = 1;
+	testTri.Positions[1].w = 1;
+	testTri.Positions[2].w = 1;
 	testTri.RandomizeColors();
 	
-	float rot = 0;
+	
 
 	
 	std::vector<Triangle> triangles;
 	auto & vertices = (MeshLoader.LoadedMeshes[0].Vertices);
 	auto & indices =  (MeshLoader.LoadedMeshes[0].Indices);
-
+	Mesh Dragon;
 	{
 		rmt_ScopedCPUSample(MeshLoading, 0);
 
@@ -74,6 +178,10 @@ int main(int argc, char* args[])
 			newTri.Positions[2].y = v2.Position.Y;
 			newTri.Positions[2].z = v2.Position.Z;
 
+			newTri.Positions[0].w = 1;
+			newTri.Positions[1].w = 1;
+			newTri.Positions[2].w = 1;
+
 			newTri.Normals[0].x = v0.Normal.X;
 			newTri.Normals[0].y = v0.Normal.Y;
 			newTri.Normals[0].z = v0.Normal.Z;
@@ -94,39 +202,43 @@ int main(int argc, char* args[])
 			newTri.RandomizeColors();
 			triangles.push_back(newTri);
 		}
+
+		Dragon.Triangles = triangles;
 	}
+
 	
-	while (true)
+	MeshLoader.~Loader();
+	
+	std::vector<Triangle> PostTransformTriangles(Dragon.Triangles.size(),Triangle());
+
+	//while (true)
 	{
 		screen.Clear();
 
-		SDL_Event event;
-		while (SDL_PollEvent(&event))
-		{
-
-		}
-
+		
+		
 		const float scale_factor = 100;
 		glm::mat4 transformat = glm::translate(glm::vec3(ScreenWidth/2,ScreenHeight/2, -1000.0))*glm::scale(glm::vec3(scale_factor,-scale_factor, scale_factor))* glm::rotate(rot, glm::vec3(0.f, 1.f, 0.f));
+		
 
+		RenderTaskData RenderData;
+		RenderData.MeshTriangles = &Dragon.Triangles;
+		RenderData.PostTransformTriangles = &PostTransformTriangles;		
+		RenderData.transform = &transformat;	
+
+		taskScheduler.Run(50, RenderMeshTask, &RenderData,0,ftl::EmptyQueueBehavior::Sleep);
+
+		
+		while (true)
 		{
-			rmt_ScopedCPUSample(Rasterizer, 0);
 
-			for (auto & t : triangles)
+			SDL_Event event;
+			while (SDL_PollEvent(&event))
 			{
-				Triangle newtri = t.GetMultipliedByMatrix(transformat);
-				drawTri(newtri, [&](ScreenCoord p, float w0, float w1, float w2)
-				{
-					glm::vec3 color = w0 * newtri.Normals[0] + w1 * newtri.Normals[1] + w2 * newtri.Normals[2];
-					float depth = 1.0 / (w0 * newtri.Positions[0].z + w1 * newtri.Positions[1].z + w2 * newtri.Positions[2].z);
-					screen.SetPixel(p.x, p.y, Color(color.r, color.g, color.b), depth);
-				}
-				);
+
 			}
-		}
-
 		screen.DrawFrame();
-
+		}
 		rot += 0.1f;
 		
 	}

@@ -12,7 +12,7 @@ struct Color {
 		f *= 256.0;
 		f = std::min(256.f, f);
 		f = std::max(0.f, f);
-		return f;
+		return (char)f;
 	}
 
 	Color(char _r, char _g, char _b): r(_r),g(_g),b(_b),a(255){	}
