@@ -134,8 +134,8 @@ void Screen::AddTriangleToTiles(Triangle &tri)
 	minX_t = std::max(minX_t, (short)0);
 	minY_t = std::max(minY_t, (short)0);
 
-	maxX_t = std::min(maxX_t, (short)xTiles);
-	maxY_t = std::min(maxY_t, (short)yTiles);
+	maxX_t = std::min(maxX_t, (short)(xTiles-1));
+	maxY_t = std::min(maxY_t, (short)(yTiles-1));
 
 	//iterate tiles and add to it
 	for (auto y = minY_t; y < maxY; y++)

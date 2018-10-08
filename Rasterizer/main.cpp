@@ -67,7 +67,7 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 
 			auto end = ExecuteVertexShader(taskScheduler, 0, PostTransformTriangles.size(), 4096, &vInputs);
 			
-			end->Wait(end->numtasks/2,true);
+			end->Wait(end->numtasks/4,true);
 
 			auto first_par = Parallel_For(//nullptr
 				taskScheduler
