@@ -145,26 +145,11 @@ int main(int argc, char* args[])
 	objl::Loader MeshLoader;
 	MeshLoader.LoadFile("dragon.obj");
 	//MeshLoader.LoadFile("Monkey.obj");
-	testTri.Positions[0].y = 1;
-	testTri.Positions[0].x = 1;
-	testTri.Positions[0].z = 0;
 
-	testTri.Positions[2].y = 1.5;
-	testTri.Positions[2].x = 1;
-	testTri.Positions[2].z = 0;
-
-	testTri.Positions[1].y = 1;
-	testTri.Positions[1].x = 2;
-	testTri.Positions[1].z = 0;
-
-	testTri.Positions[0].w = 1;
-	testTri.Positions[1].w = 1;
-	testTri.Positions[2].w = 1;
-	testTri.RandomizeColors();
 	
 	
 
-	
+	//load the mesh into internal format
 	std::vector<Triangle> triangles;
 	auto & vertices = (MeshLoader.LoadedMeshes[0].Vertices);
 	auto & indices =  (MeshLoader.LoadedMeshes[0].Indices);
@@ -226,7 +211,7 @@ int main(int argc, char* args[])
 	
 	std::vector<Triangle> PostTransformTriangles(Dragon.Triangles.size(),Triangle());
 
-	//while (true)
+	
 	{
 		screen.Clear();
 
@@ -241,65 +226,15 @@ int main(int argc, char* args[])
 		RenderData.PostTransformTriangles = &PostTransformTriangles;		
 		RenderData.transform = &transformat;	
 
+
+		//run the core rendering task
 		taskScheduler.Run(50, RenderMeshTask, &RenderData,0,ftl::EmptyQueueBehavior::Sleep);
 
 		
-		//while (true)
-		//{
-		//
-		//	SDL_Event event;
-		//	while (SDL_PollEvent(&event))
-		//	{
-		//
-		//	}
-		//screen.DrawFrame();
-		//}
-		//rot += 0.1f;
+		
 		
 	}
-	/*
-	//The window we'll be rendering to
-	SDL_Window* window = NULL;
-
-	//The surface contained by the window
-	SDL_Surface* screenSurface = NULL;
-
-	//Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
-	{
-		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-	}
-	else
-	{
-		//Create window
-		window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if (window == NULL)
-		{
-			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-		}
-		else
-		{
-			//Get window surface
-			screenSurface = SDL_GetWindowSurface(window);
-
-			//Fill the surface white
-			SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-
-			//Update the surface
-			SDL_UpdateWindowSurface(window);
-
-			//Wait two seconds
-			SDL_Delay(2000);
-		}
-	}
-
-	//Destroy window
-	SDL_DestroyWindow(window);
-
-	//Quit SDL subsystems
-	SDL_Quit();
-
-	*/
+	
 
 
 	// Destroy the main instance of Remotery.

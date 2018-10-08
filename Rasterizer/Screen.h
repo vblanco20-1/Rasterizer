@@ -19,7 +19,7 @@ struct Sprite
 
 struct TileQueueTraits : public moodycamel::ConcurrentQueueDefaultTraits
 {
-	static const size_t BLOCK_SIZE = 256;		// Use bigger blocks
+	static const size_t BLOCK_SIZE = 1024;		// Use bigger blocks
 };
 
 

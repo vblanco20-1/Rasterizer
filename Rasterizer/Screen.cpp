@@ -194,7 +194,7 @@ void Screen::DrawTile(FramebufferTile * Tile)
 {
 	Triangle buffer[TileQueueTraits::BLOCK_SIZE];
 
-	while (true)
+	while (Tile->trianglequeue.size_approx() > 0)
 	{
 		//unload BLOCK_SIZE at a time
 		size_t count = Tile->trianglequeue.try_dequeue_bulk(buffer, TileQueueTraits::BLOCK_SIZE);

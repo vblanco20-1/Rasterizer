@@ -44,34 +44,6 @@ struct TaskEnd {
 	};
 	
 };
-/*
-struct VertexShaderTaskEnd {
-
-	ftl::Task * tasks{ nullptr };
-	VertexShaderTaskData * taskdata{ nullptr };
-	ftl::AtomicCounter counter;
-	ftl::TaskScheduler *taskScheduler{ nullptr };
-	int  numtasks{0};
-
-	VertexShaderTaskEnd(ftl::TaskScheduler * sched): counter(sched),taskScheduler(sched)
-	{
-
-	}
-
-	void Wait(int counterval = 0, bool PinThread = false) {
-	
-		if (taskScheduler)
-		{
-			taskScheduler->WaitForCounter(&counter, counterval, PinThread);
-		}
-		
-	};
-	void Clear() {
-		delete[] tasks;
-		delete[] taskdata;
-	}
-};
-*/
 
 void VertexShaderSubfunction(ftl::TaskScheduler *taskScheduler, void *arg) {
 	VertexShaderTaskData *subset = reinterpret_cast<VertexShaderTaskData *>(arg);
