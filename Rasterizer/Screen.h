@@ -29,6 +29,56 @@ struct FramebufferTile {
 	//coordinates
 	uint16_t minX, maxX, minY, maxY;
 	TileQueue trianglequeue;
+	
+	FramebufferTile() {
+		depthBuffer = new float[TileSize * TileSize];
+		buffer = new Color[TileSize * TileSize];
+	}
+	~FramebufferTile() {
+		delete[] depthBuffer;
+		delete[] buffer;
+	}
+
+	void SetPixel(uint16_t x, uint16_t y,const Color& color, float Depth) {
+
+		x -= minX;
+		y -= minY;
+
+		const unsigned int offset = (TileSize * y) + x;
+		const char pxC = 0;
+
+		const unsigned int idx = (TileSize * y) + x;
+		if (Depth <= depthBuffer[idx])
+		{
+			
+			buffer[idx] = color;
+			depthBuffer[idx] = Depth;
+		}
+	}
+
+	__forceinline Color &GetPixelFromCoordinates(uint16_t x, uint16_t y)const {
+
+		x -= minX;
+		y -= minY;
+		const unsigned int idx = (TileSize * y) + x;
+		return buffer[idx];
+	}
+
+	
+
+	void Clear() {
+		for (int i = 0; i < TileSize*TileSize; i++)
+		{
+			buffer[i] = Color(0.1f,0.1f,0.1f);
+		}
+		for (int i = 0; i < TileSize*TileSize; i++)
+		{
+			depthBuffer[i] = 100000.0f;
+		}
+	}
+private:
+	Color *buffer;//[TileSize * TileSize];
+	float *depthBuffer;// [TileSize * TileSize];
 };
 
 class Screen
@@ -67,7 +117,8 @@ public:
 	void BuildTileArray();
 
 	void DrawTile(short tile_x, short tile_y);
-	void DrawTile(FramebufferTile * Tile);
+	void DrawTile(FramebufferTile * Tile); 
+		void BlitTile(FramebufferTile * Tile);
 
 	short GetXTiles() { return xTiles; };
 	short GetYTiles() { return yTiles; };

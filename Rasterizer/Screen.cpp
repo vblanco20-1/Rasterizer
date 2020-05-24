@@ -2,7 +2,9 @@
 
 #include <iostream>
 
-
+#include "Remotery.h"
+#include "Globals.h"
+#include "ParallelFor.h"
 using namespace std;
 
 
@@ -23,7 +25,7 @@ Screen::Screen()
 	(
 		window,
 		-1,
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+		SDL_RENDERER_ACCELERATED// | SDL_RENDERER_PRESENTVSYNC
 	);
 
 	SDL_RendererInfo info;
@@ -68,13 +70,25 @@ Screen::~Screen()
 
 void Screen::Clear()
 {
-	for (auto &p : tileMapPixels)
 	{
-		p = 50;
-	}
-	for (auto &p : depthBuffer)
-	{
-		p = 100000.0f;
+		//rmt_ScopedCPUSample(FramebufferClear, 0);
+		//for (auto &p : tileMapPixels)
+		//{
+		//	p = 50;
+		//}
+		//for (auto &p : depthBuffer)
+		//{
+		//	p = 100000.0f;
+		//}
+		
+		//Parallel_For(g_taskScheduler, 0, Tiles.size(), 8, [=](auto i) {
+		//	Tiles[i].Clear();
+		//});
+		//end->Wait(0, true);
+		//for (auto & t : Tiles)
+		//{
+		//	t.Clear();
+		//}
 	}
 }
 
@@ -86,8 +100,23 @@ void Screen::DrawFrame()
 	//	p = rand() % 255;
 	//}
 
+	//{
+		rmt_ScopedCPUSample(FramebufferCopy, 0);
+
+	////copy tiles
+	//for (FramebufferTile& t : Tiles) {
+	//	
+	//}
+	//}
+
+	
+
+
+
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(renderer);
+
+
 
 	SDL_UpdateTexture
 	(
@@ -175,6 +204,7 @@ void Screen::BuildTileArray()
 
 			if (tile.maxY > ScreenHeight) tile.maxY = ScreenHeight;
 
+			
 
 		}
 	}
@@ -207,6 +237,30 @@ void Screen::DrawTile(FramebufferTile * Tile)
 		{
 			
 			drawTri_Tile(*buffer[i], Tile);
+		}
+	}
+}
+
+void Screen::BlitTile(FramebufferTile * Tile)
+{
+	FramebufferTile & t = *Tile;
+	const int maxY = std::min(ScreenHeight, t.maxY);
+	const int maxX = std::min(ScreenWidth, t.maxX);
+	
+	for (int y = t.minY; y < maxY; y++)
+	{
+		for (int x = t.minX; x < maxX; x++)
+		{
+
+			Color color = t.GetPixelFromCoordinates(x, y);
+
+			const unsigned int offset = (ScreenWidth * 4 * y) + x * 4;
+
+			tileMapPixels[offset + 0] = color.b;        // b
+			tileMapPixels[offset + 1] = color.g;          // g
+			tileMapPixels[offset + 2] = color.r;        // r
+
+			tileMapPixels[offset + 3] = color.a;    // a		
 		}
 	}
 }

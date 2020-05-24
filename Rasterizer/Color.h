@@ -22,4 +22,7 @@ struct Color {
 		b = FloatToColor(_b);
 
 	}
+	Color():r((char)255), g((char)0), b((char)0), a((char)255) {
+		
+	}
 };

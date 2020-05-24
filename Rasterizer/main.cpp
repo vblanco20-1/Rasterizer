@@ -12,12 +12,14 @@ and may not be redistributed without written permission.*/
 #include<ctime>
 #include <chrono>
 #define GLM_ENABLE_EXPERIMENTAL
-#define OBJL_CONSOLE_OUTPUT
+//#define OBJL_CONSOLE_OUTPUT
 #include "OBJ_Loader.h"
 #include <glm/gtx/transform.hpp>
 #include <glm/geometric.hpp>
 
-#include "Remotery.h"
+#include "Tracy.hpp"
+
+
 
 #include "ParallelFor.h"
 #include "Globals.h"
@@ -27,6 +29,7 @@ and may not be redistributed without written permission.*/
 
 struct Mesh {
 	std::vector<Triangle> Triangles;
+	//std::vector<glm::vec4> Positions;
 };
 
 struct RenderTaskData {
@@ -65,42 +68,55 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 		
 
 
-			auto end = ExecuteVertexShader(taskScheduler, 0, PostTransformTriangles.size(), 4096, &vInputs);
+			auto vertex_shader = ExecuteVertexShader(taskScheduler, 0, PostTransformTriangles.size(), 8194, &vInputs);
 			
-			end->Wait(end->numtasks/4,true);
+			vertex_shader->Wait(vertex_shader->numtasks/2,true);
 
-			auto first_par = Parallel_For(//nullptr
+			ftl::AtomicCounter CompletionCounter(taskScheduler,1);
+			//vertex_shader->Wait(0, true);
+			auto first_par = Parallel_For_Counter(//nullptr
 				taskScheduler
 
-				, 0, g_Framebuffer->Tiles.size(), 1, [&](auto i) {
-
+				, 0, g_Framebuffer->Tiles.size(), 1, &CompletionCounter,
+				
+				[&](auto i) {
+				g_Framebuffer->Tiles[i].Clear();
 				g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
 				
-			});
-			end->Wait(0, true);
-			first_par->Wait(0, true);
+				
+			}, [&](auto i) {				
+					
+					g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
+					g_Framebuffer->BlitTile(&g_Framebuffer->Tiles[i]);
+				}			
 			
+			);
+			vertex_shader->Wait(0, true);
+			CompletionCounter.FetchSub(1);
+
+			first_par->Wait(0, false);			
 			
-			delete end;
-
-			
-
-			auto second_par = Parallel_For(//nullptr
-				taskScheduler
-
-				, 0, g_Framebuffer->Tiles.size(), 1, [&](auto i) {
-
-				g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
-			});
-
-			
-			second_par->Wait(0, true);
-
-
-			
-
+			delete vertex_shader;
 			delete first_par;
-			delete second_par;
+			
+
+			//auto second_par = Parallel_For(//nullptr
+			//	taskScheduler
+			//
+			//	, 0, g_Framebuffer->Tiles.size(), 1, [&](auto i) {
+			//
+			//	g_Framebuffer->DrawTile(&g_Framebuffer->Tiles[i]);
+			//	g_Framebuffer->BlitTile(&g_Framebuffer->Tiles[i]);
+			//});
+			//
+			//
+			//second_par->Wait(0, true);
+
+
+			
+
+			
+			//delete second_par;
 			
 					
 
@@ -114,7 +130,8 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 		std::cout << "Rasterizer Full Frame Time: " << elapsed.count() << '\n';
 
 		{
-			rmt_ScopedCPUSample(Wait, 0);
+			
+			//rmt_ScopedCPUSample(Wait, 0);
 			//stall
 			//Concurrency::wait(500);
 		}
@@ -126,15 +143,19 @@ void RenderMeshTask(ftl::TaskScheduler *taskScheduler, void *arg) {
 
 
 }
+
+#include "FastObj.h"
 float rot = 0;
 Screen*g_Framebuffer{nullptr};
+ftl::TaskScheduler*g_taskScheduler{ nullptr };
 int main(int argc, char* args[])
 {
 
 	ftl::TaskScheduler taskScheduler;
+	g_taskScheduler = &taskScheduler;
 
-	Remotery* rmt;
-	rmt_CreateGlobalInstance(&rmt);
+	//Remotery* rmt;
+	//rmt_CreateGlobalInstance(&rmt);
 	Screen screen;
 
 	g_Framebuffer = &screen;
@@ -142,8 +163,54 @@ int main(int argc, char* args[])
 	srand(time(0));
 	Triangle testTri;
 
+	ObjFile dragonfile;
+	//for(int i = 0; i < 10 ; i++)
+	{
+		dragonfile.faces.clear();
+		dragonfile.normals.clear();
+		dragonfile.positions.clear();
+		std::cout << std::endl;
+		std::cout << "LOADING OBJ FAST "<< std::endl;
+
+		std::cout << "--------------------------" << std::endl;
+
+		ZoneScopedN("Mesh Load FastObj");
+		auto start = std::chrono::system_clock::now();
+		dragonfile.load_file("dragon.obj");
+		//dragonfile.load_file("C:/Users/victor/Downloads/brickPile_60m.obj");
+
+		std::cout << "The mesh has " << dragonfile.positions.size() <<" positions" << std::endl;
+		std::cout << "The mesh has " << dragonfile.normals.size() << " normals" << std::endl;
+		std::cout << "The mesh has " << dragonfile.uvs.size() << " uv coords" << std::endl;
+
+		std::cout << "The mesh has " << dragonfile.faces.size() / 3 << " triangles" << std::endl;
+
+		auto end = std::chrono::system_clock::now();
+		auto elapsed =
+			std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+		std::cout << '\n' << "The mesh loading took :" << elapsed.count() <<"ms " << '\n';
+	}
+	
 	objl::Loader MeshLoader;
-	MeshLoader.LoadFile("dragon.obj");
+	for(int i = 0; i < 10; i++)
+	{
+		std::cout  << std::endl;
+		std::cout << "LOADING OBJ LIBRARY " << std::endl;
+
+		std::cout << "--------------------------" << std::endl;
+
+		auto start = std::chrono::system_clock::now();
+		ZoneScopedN("Mesh Load OBJLoader");
+		MeshLoader.LoadFile("dragon.obj");
+		auto end = std::chrono::system_clock::now();
+
+		std::cout << "The mesh has " << MeshLoader.LoadedMeshes[0].Indices.size() / 3 << " triangles" << std::endl;
+
+		auto elapsed =
+			std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+		std::cout << '\n' << "The mesh loading took :" << elapsed.count() << "ms " << '\n';
+	}
+	return 0;
 	//MeshLoader.LoadFile("Monkey.obj");
 
 	
@@ -155,7 +222,8 @@ int main(int argc, char* args[])
 	auto & indices =  (MeshLoader.LoadedMeshes[0].Indices);
 	Mesh Dragon;
 	{
-		rmt_ScopedCPUSample(MeshLoading, 0);
+		ZoneScopedN("Mesh Process");
+		//rmt_ScopedCPUSample(MeshLoading, 0);
 
 
 		for (int i = 0; i < indices.size(); i += 3)
@@ -213,7 +281,7 @@ int main(int argc, char* args[])
 
 	
 	{
-		screen.Clear();
+		//screen.Clear();
 
 		
 		
@@ -228,7 +296,7 @@ int main(int argc, char* args[])
 
 
 		//run the core rendering task
-		taskScheduler.Run(50, RenderMeshTask, &RenderData,0,ftl::EmptyQueueBehavior::Sleep);
+		taskScheduler.Run(500, RenderMeshTask, &RenderData,0,ftl::EmptyQueueBehavior::Sleep);
 
 		
 		
@@ -238,6 +306,6 @@ int main(int argc, char* args[])
 
 
 	// Destroy the main instance of Remotery.
-	rmt_DestroyGlobalInstance(rmt);
+	//rmt_DestroyGlobalInstance(rmt);
 	return 0;
 }

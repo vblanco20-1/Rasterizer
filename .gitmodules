@@ -5,3 +5,6 @@
 [submodule "ThirdParty/Remotery"]
 	path = ThirdParty/Remotery
 	url = https://github.com/Celtoys/Remotery.git
+[submodule "ThirdParty/Tracy"]
+	path = ThirdParty/Tracy
+	url = https://github.com/wolfpld/tracy
